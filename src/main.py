@@ -4,7 +4,6 @@ import urllib.request
 import datetime
 import time
 import json
-from config import *
 import pandas as pd
 
 
@@ -23,8 +22,6 @@ def get_request_url(url,client_id='vabkyzx1im', client_secret='NZttREt7fWJ4jat98
         return None
 
 
-# [CODE 1]
-
 def getGeoData(address):
     base = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
     node = ""
@@ -41,18 +38,20 @@ def getGeoData(address):
 
 def main():
     # 엑셀 읽기
-    df = pd.read_csv('주소API 테스트데이터.csv')
+    df = pd.read_csv('주소_데이터.csv')
     df['위도'] = 0
     df['경도'] = 0
     i = 0
     for id, address,y,x in df.values:
+        #API 사용
         try:
             jsonResult = getGeoData(address)
         except:
             i = i +1
-            continue
+            continueㄴ
         print('index, %d ,검색 주소 : %s'%(i,address))
 
+        # 결과 parsing
         if 'addresses' in jsonResult.keys():
             print('총 검색 결과: ', jsonResult['addresses'].__len__())
             if jsonResult['addresses'].__len__() >=1:
@@ -70,7 +69,7 @@ def main():
         i = i +1
 
 
-
+    #엑셀 쓰기
     df.to_csv('주소_API_결과_데이터.csv')
 if __name__ == '__main__':
     main()
