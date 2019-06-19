@@ -5,6 +5,7 @@ import datetime
 import time
 import json
 from config import *
+import pandas as pd
 
 
 def get_request_url(url,client_id='vabkyzx1im', client_secret='NZttREt7fWJ4jat98knMXWcYjGSnNiy468I7rh7x'):
@@ -39,18 +40,37 @@ def getGeoData(address):
 
 
 def main():
-    jsonResult = getGeoData('서울특별시 종로구 사직로 161 경복궁')
+    # 엑셀 읽기
+    df = pd.read_csv('주소API 테스트데이터.csv')
+    df['위도'] = 0
+    df['경도'] = 0
+    i = 0
+    for id, address,y,x in df.values:
+        try:
+            jsonResult = getGeoData(address)
+        except:
+            i = i +1
+            continue
+        print('index, %d ,검색 주소 : %s'%(i,address))
 
-    if 'result' in jsonResult.keys():
-        print('총 검색 결과: ', jsonResult['result']['total'])
-        print('검색어: ', jsonResult['result']['userquery'])
+        if 'addresses' in jsonResult.keys():
+            print('총 검색 결과: ', jsonResult['addresses'].__len__())
+            if jsonResult['addresses'].__len__() >=1:
+                item = jsonResult['addresses'][0]
+                print('=======================')
+                print('위도: ', str(item['y']))
+                print('경도: ', str(item['x']))
+                print('=======================')
+                #df.iloc[i] = {'ID':id,'주소':address,'위도': float(item['y']), '경도': float(item['x'])}
+                y_update = pd.Series([float(item['y'])],name='위도', index=[i])
+                x_update = pd.Series([float(item['x'])], name='경도', index=[i])
+                df.update(y_update)
+                df.update(x_update)
 
-        for item in jsonResult['result']['items']:
-            print('=======================')
-            print('주소: ', item['address'])
-            print('위도: ', str(item['point']['y']))
-            print('경도: ', str(item['point']['x']))
+        i = i +1
 
 
+
+    df.to_csv('주소_API_결과_데이터.csv')
 if __name__ == '__main__':
     main()
